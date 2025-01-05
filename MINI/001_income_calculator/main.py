@@ -1,7 +1,7 @@
 # Create a function to calculate finances
 def calculate_finances(monthly_income: float, tax_rate: float, expenses: float, currency: str) -> None:
     # Do the math for each field
-    monthly_tax: float = monthly_income * tax_rate
+    monthly_tax: float = monthly_income * (tax_rate/100)
     monthly_net_income: float = monthly_income - monthly_tax
     monthly_leftover: float = monthly_net_income - expenses
     yearly_income: float = monthly_income * 12
@@ -25,32 +25,28 @@ def calculate_finances(monthly_income: float, tax_rate: float, expenses: float, 
     print(f'Yearly leftover: {currency}{yearly_leftover:,.2f}')
     print('--------------------------------')
 
+# get_positive_input function
+def get_positive_input(prompt: str) -> float:
+    while True:
+        try:
+            value = float(input(prompt))
+            if value <= 0:
+                print("Value must be greater than zero.")
+                continue
+            return value
+        except ValueError:
+            print("Invalid input. Please enter a numeric value.")
 
 # Create a main entry point for the program
 def main() -> None:
-    while True:
-        try:
-            monthly_income: float = float(input('Enter your monthly income: '))
-            break
-        except ValueError:
-            print("Invalid input. Please enter a numeric value for monthly income.")
-
-    while True:
-        try:
-            tax_rate: float = float(input('Enter your tax rate (%): '))
-            break
-        except ValueError:
-            print("Invalid input. Please enter a numeric value for tax rate.")
-
-    while True:
-        try:
-            expenses: float = float(input('Enter your monthly expenses: '))
-            break
-        except ValueError:
-            print("Invalid input. Please enter a numeric value for expenses.")
+    # Get user input
+    currency: str = '₹'
+    monthly_income: float = get_positive_input(f"Enter your monthly income(in {currency}) : ")
+    tax_rate: float = get_positive_input("Enter your tax rate as a percentage (e.g., 20 for 20%): ")
+    expenses: float = get_positive_input(f"Enter your monthly expenses(in {currency}) : ")
 
     # Call the function
-    calculate_finances(monthly_income, tax_rate, expenses, currency='₹')
+    calculate_finances(monthly_income, tax_rate, expenses, currency)
 
 # Run the script
 if __name__ == "__main__":
