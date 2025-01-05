@@ -1,7 +1,7 @@
 # Description: A simple script to split expenses among a group of people.
 def calculate_split(total_amount: float, splits: list[float], currency: str) -> None:
     # Validate the splits
-    if sum(splits) != 100:
+    if round(sum(splits), 2) != 100:
         raise ValueError('The splits must add up to 100%.')
     # Perform the calculation
     shares = [total_amount * (split / 100) for split in splits]
@@ -15,7 +15,11 @@ def calculate_split(total_amount: float, splits: list[float], currency: str) -> 
 def get_total_amount() -> float:
     while True:
         try:
-            return float(input('Enter total amount: '))
+            amount = float(input('Enter total amount: '))
+            if amount <= 0:
+                print('Total amount must be greater than 0.')
+            else:
+                return amount
         except ValueError:
             print('Invalid input. Enter a numeric value.')
 
@@ -31,13 +35,29 @@ def get_number_of_people() -> int:
         except ValueError:
             print('Invalid input. Enter an integer.')
 
+# get_bool_input function
+def get_bool_input(prompt: str) -> bool:
+    while True:
+        try:
+            input_str = input(prompt)
+            if input_str not in ['y', 'Y', 'n', 'N', 'yes', 'YES', 'no', 'NO']:
+                raise ValueError
+            return input_str in ['y', 'Y', 'yes', 'YES']
+        except ValueError:
+            print("Invalid input. Please enter 'y' or 'n'.")
+
 # Create a function to get the percentage input
 def get_percentage_input(person_num: int, remaining: float) -> float:
     while True:
         try:
-            split = float(input(f'Enter the percentage for person {person_num}: '))
+            split = float(input(f'Enter the percentage for person {person_num} (Remaining: {remaining:.2f}%): '))
             if split > remaining:
                 print(f'Invalid input. Enter a percentage less than or equal to {remaining:.2f}.')
+            elif split == remaining:
+                print(f'Given percentage is equal to {remaining:.2f}.')
+                confirm = get_bool_input("Hence, Some people will not share the expense. Proceed? (y/n): ")
+                if confirm:
+                    return split
             else:
                 return split
         except ValueError:
@@ -47,17 +67,16 @@ def get_percentage_input(person_num: int, remaining: float) -> float:
 def main() -> None:
     # 6. Try to get the user input and perform the calculation
     total_amount: float = get_total_amount()
-    number_of_people: int = get_number_of_people()  
-    
-    while True:
-        try:
-            split_srt: str = input('Do you want to split the expense equally among all people? (y/n): ')
-            if split_srt not in ['y', 'Y', 'n', 'N', 'yes', 'YES', 'no', 'NO']:
-                raise ValueError
-            equal_split: bool = split_srt in ['y', 'Y', 'yes', 'YES']
-            break
-        except ValueError:
-            print("Invalid input. Please enter 'y' or 'n'.")
+    number_of_people: int = get_number_of_people()
+
+    # Handle the case where there is only one person
+    if number_of_people == 1:
+        print("Only one person. The total expense will be assigned to them.")
+        splits = [100]
+        calculate_split(total_amount, splits, currency='€')
+        return
+
+    equal_split: bool = get_bool_input('Do you want to split the expense equally among all people? (y/n): ')
     
     if equal_split:
         splits = [100 / number_of_people] * number_of_people
@@ -73,7 +92,6 @@ def main() -> None:
                 print(f"Person {i + 1} will be sharing the remaining {remaining_sharing:.2f}%.")
                 split = remaining_sharing
             else:
-                print(f"To split the remaining {remaining_sharing:.2f}% among the remaining {number_of_people - i} people.")
                 split = get_percentage_input(i + 1, remaining_sharing)
                 remaining_sharing -= split
             splits.append(split)
