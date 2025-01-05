@@ -10,12 +10,17 @@ def calculate_split(total_amount: float, splits: list[float], currency: str) -> 
     print(f'Total expense: {currency}{total_amount:,.2f}')
     for i, share in enumerate(shares, 1):
         print(f'Person {i} should pay: {currency} {share:,.2f}')
+    
+    # Export the results to a file if the user wants
+    export_option = get_bool_input('Would you like to export the results to a file? (y/n): ')
+    if export_option:
+        export_to_file(total_amount, shares, currency)
 
 # Create a function to get the total amount
-def get_total_amount() -> float:
+def get_total_amount(prompt: str) -> float:
     while True:
         try:
-            amount = float(input('Enter total amount: '))
+            amount = float(input(prompt))
             if amount <= 0:
                 print('Total amount must be greater than 0.')
             else:
@@ -63,17 +68,26 @@ def get_percentage_input(person_num: int, remaining: float) -> float:
         except ValueError:
             print('Invalid input. Please enter a numeric value.')
 
+# Create a function to export the results to a file
+def export_to_file(total_amount: float, shares: list[float], currency: str) -> None:
+    with open('expense_report.txt', 'w') as f:
+        f.write(f'Total expense: {currency}{total_amount:,.2f}\n')
+        for i, share in enumerate(shares, 1):
+            f.write(f'Person {i} should pay: {currency} {share:,.2f}\n')
+    print("Expense report exported to 'expense_report.txt'.")
+
 # Create a main entry point
 def main() -> None:
     # 6. Try to get the user input and perform the calculation
-    total_amount: float = get_total_amount()
+    currency: str = '₹'
+    total_amount: float = get_total_amount(f"Enter your Total Expense (in {currency}) : ")
     number_of_people: int = get_number_of_people()
 
     # Handle the case where there is only one person
     if number_of_people == 1:
         print("Only one person. The total expense will be assigned to them.")
         splits = [100]
-        calculate_split(total_amount, splits, currency='€')
+        calculate_split(total_amount, splits, currency)
         return
 
     equal_split: bool = get_bool_input('Do you want to split the expense equally among all people? (y/n): ')
@@ -97,7 +111,7 @@ def main() -> None:
             splits.append(split)
 
     # Call the function to calculate and display expenses
-    calculate_split(total_amount, splits, currency='€')
+    calculate_split(total_amount, splits, currency)
 
 # Run the script
 if __name__ == '__main__':
